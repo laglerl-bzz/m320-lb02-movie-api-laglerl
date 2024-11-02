@@ -19,10 +19,10 @@ def generate_testdata():
 
     # Generate movies
     movie_dao.create_table()
-    movie_dao.add_movie(Movie(1, "Inception", 5))
-    movie_dao.add_movie(Movie(2, "The Matrix", 4))
-    movie_dao.add_movie(Movie(3, "Interstellar", 5))
-    movie_dao.add_movie(Movie(4, "The Godfather", 5))
+    movie_dao.add_movie(Movie(1, "Inception", [1, 2, 1]))
+    movie_dao.add_movie(Movie(2, "The Matrix", [4, 5, 4]))
+    movie_dao.add_movie(Movie(3, "Interstellar", [5, 5, 5]))
+    movie_dao.add_movie(Movie(4, "The Godfather", [5, 4, 5]))
 
     movie_dao.close()
 
