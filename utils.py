@@ -46,7 +46,10 @@ def create_rating_filter(min_rating, title):
              andernfalls False
     """
 
-    return lambda movie: calculate_average_rating(movie.ratings) > min_rating and title.lower() in movie.title.lower()
+    return (
+        lambda movie: calculate_average_rating(movie.ratings) > min_rating
+        and title.lower() in movie.title.lower()
+    )
 
 
 def filter_valid_ratings(ratings):

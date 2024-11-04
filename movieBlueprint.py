@@ -6,7 +6,12 @@ from flask import Blueprint, jsonify, request
 from functools import reduce
 from movieDao import MovieDao
 from movie import Movie
-from utils import calculate_average_rating, apply_function_to_movies, create_rating_filter, get_highest_rating_for_movie
+from utils import (
+    calculate_average_rating,
+    apply_function_to_movies,
+    create_rating_filter,
+    get_highest_rating_for_movie,
+)
 
 movie_blueprint = Blueprint("movie_blueprint", __name__)
 movie_dao = MovieDao("movie_rating_example.db")
@@ -26,15 +31,9 @@ def list_routes():
             "/movies/<int:movie_id> - Get a movie by ID",
             "/movies/<int:movie_id>/highest_rating - Get highest rating for a movie",
         ],
-        "POST": [
-            "/movies - Add a new movie"
-        ],
-        "PUT": [
-            "/movies/<int:movie_id> - Update a movie"
-        ],
-        "DELETE": [
-            "/movies/<int:movie_id> - Delete a movie"
-        ]
+        "POST": ["/movies - Add a new movie"],
+        "PUT": ["/movies/<int:movie_id> - Update a movie"],
+        "DELETE": ["/movies/<int:movie_id> - Delete a movie"],
     }
     return jsonify(routes), 200
 
@@ -57,7 +56,9 @@ def average_ratings_v1():
 @movie_blueprint.route("/movies/average_ratings_v2", methods=["GET"])
 def average_ratings_v2():
     movies = movie_dao.get_all_movies()
-    average_ratings = list(map(calculate_average_rating, [movie.ratings for movie in movies]))
+    average_ratings = list(
+        map(calculate_average_rating, [movie.ratings for movie in movies])
+    )
 
     return jsonify({"average_ratings": average_ratings}), 200
 
@@ -69,36 +70,56 @@ def filter_movies_v1():
 
     filter_func = create_rating_filter(min_rating, title)
 
-    filtered_movies = [movie for movie in movie_dao.get_all_movies() if filter_func(movie)]
+    filtered_movies = [
+        movie for movie in movie_dao.get_all_movies() if filter_func(movie)
+    ]
     return jsonify([movie.__dict__ for movie in filtered_movies]), 200
 
 
-@movie_blueprint.route('/movies/filter_v2', methods=['GET'])
+@movie_blueprint.route("/movies/filter_v2", methods=["GET"])
 def filter_movies_v2():
-    min_rating = request.args.get('min_rating', type=float, default=3.0)
+    min_rating = request.args.get("min_rating", type=float, default=3.0)
     movies = movie_dao.get_all_movies()
-    filtered_movies = list(filter(lambda movie: calculate_average_rating(movie.ratings) > min_rating, movies))
+    filtered_movies = list(
+        filter(
+            lambda movie: calculate_average_rating(movie.ratings) > min_rating, movies
+        )
+    )
 
     filtered_titles = list(map(lambda movie: movie.title, filtered_movies))
 
-    total_average_rating = reduce(lambda acc, movie: acc + calculate_average_rating(movie.ratings), filtered_movies, 0)
+    total_average_rating = reduce(
+        lambda acc, movie: acc + calculate_average_rating(movie.ratings),
+        filtered_movies,
+        0,
+    )
     return jsonify(filtered_titles, total_average_rating), 200
 
 
-@movie_blueprint.route('/movies/overall_average', methods=['GET'])
+@movie_blueprint.route("/movies/overall_average", methods=["GET"])
 def filter_movies_v3():
-    min_rating = request.args.get('min_rating', type=float, default=3.0)
+    min_rating = request.args.get("min_rating", type=float, default=3.0)
     movies = movie_dao.get_all_movies()
 
-    filtered_movies = list(filter(lambda movie: len(movie.ratings) >= min_rating, movies))
-    average_ratings = list(map(calculate_average_rating, [movie.ratings for movie in filtered_movies]))
-    overall_average = reduce(lambda acc, x: acc + x, average_ratings) / len(average_ratings) if average_ratings else 0
+    filtered_movies = list(
+        filter(lambda movie: len(movie.ratings) >= min_rating, movies)
+    )
+    average_ratings = list(
+        map(calculate_average_rating, [movie.ratings for movie in filtered_movies])
+    )
+    overall_average = (
+        reduce(lambda acc, x: acc + x, average_ratings) / len(average_ratings)
+        if average_ratings
+        else 0
+    )
 
     return jsonify(overall_average), 200
 
 
 def sort_movies_by_average_rating(movies):
-    return sorted(movies, key=lambda movie: calculate_average_rating(movie.ratings), reverse=True)
+    return sorted(
+        movies, key=lambda movie: calculate_average_rating(movie.ratings), reverse=True
+    )
 
 
 @movie_blueprint.route("/movies/sorted", methods=["GET"])
@@ -113,10 +134,7 @@ def get_movie(movie_id):
     movie = movie_dao.get_movie(movie_id)
     if movie:
         average_rating = calculate_average_rating(movie.ratings)
-        return jsonify({
-            "movie": movie.__dict__,
-            "average_rating": average_rating
-        }), 200
+        return jsonify({"movie": movie.__dict__, "average_rating": average_rating}), 200
     else:
         return jsonify({"message": "Movie not found"}), 404
 
@@ -165,4 +183,3 @@ def highest_rating_endpoint(movie_id):
         return jsonify({"title": movie.title, "highest_rating": highest_rating}), 200
     else:
         return jsonify({"message": "Movie not found"}), 404
-

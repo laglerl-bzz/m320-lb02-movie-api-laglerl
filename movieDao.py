@@ -5,6 +5,7 @@ Movie Data Access Object
 import sqlite3
 from movie import Movie
 
+
 class MovieDao:
 
     def __init__(self, db_file):
@@ -23,7 +24,9 @@ class MovieDao:
         self.conn.commit()
 
     def add_movie(self, movie):
-        ratings_str = ','.join(map(str, movie.ratings))  # Convert list of ratings to a string
+        ratings_str = ",".join(
+            map(str, movie.ratings)
+        )  # Convert list of ratings to a string
         self.cursor.execute(
             "INSERT INTO movies (title, ratings) VALUES (?, ?)",
             (movie.title, ratings_str),
@@ -37,7 +40,9 @@ class MovieDao:
         )
         row = self.cursor.fetchone()
         if row:
-            ratings = list(map(int, row[2].split(',')))  # Convert ratings string back to a list of integers
+            ratings = list(
+                map(int, row[2].split(","))
+            )  # Convert ratings string back to a list of integers
             return Movie(row[0], row[1], ratings)
         return None
 
@@ -46,12 +51,16 @@ class MovieDao:
         rows = self.cursor.fetchall()
         movies = []
         for row in rows:
-            ratings = list(map(int, row[2].split(',')))  # Convert ratings string back to a list of integers
+            ratings = list(
+                map(int, row[2].split(","))
+            )  # Convert ratings string back to a list of integers
             movies.append(Movie(row[0], row[1], ratings))
         return movies
 
     def update_movie(self, movie):
-        ratings_str = ','.join(map(str, movie.ratings))  # Convert list of ratings to a string
+        ratings_str = ",".join(
+            map(str, movie.ratings)
+        )  # Convert list of ratings to a string
         self.cursor.execute(
             "UPDATE movies SET title = ?, ratings = ? WHERE movie_id = ?",
             (movie.title, ratings_str, movie.movie_id),

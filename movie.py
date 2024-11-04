@@ -10,4 +10,3 @@ class Movie:
     movie_id: int
     title: str
     ratings: [int]
-

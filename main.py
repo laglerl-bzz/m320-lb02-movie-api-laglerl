@@ -1,6 +1,7 @@
 """
 Movie Rating API
 """
+
 from flask import Flask
 
 from movieBlueprint import movie_blueprint
