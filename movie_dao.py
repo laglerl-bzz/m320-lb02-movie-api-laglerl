@@ -7,6 +7,9 @@ from movie import Movie
 
 
 class MovieDao:
+    """
+    Movie Data Access Object
+    """
 
     def __init__(self, db_file):
         self.conn = sqlite3.connect(db_file, check_same_thread=False)
@@ -14,6 +17,10 @@ class MovieDao:
         self.create_table()  # Ensure the table is created
 
     def create_table(self):
+        """
+        Create the movies table.
+        :return:
+        """
         self.cursor.execute("""DROP TABLE IF EXISTS movies""")
         self.cursor.execute(
             """CREATE TABLE IF NOT EXISTS movies (
@@ -24,6 +31,11 @@ class MovieDao:
         self.conn.commit()
 
     def add_movie(self, movie):
+        """
+        Add a movie to the database.
+        :param movie:
+        :return:
+        """
         ratings_str = ",".join(
             map(str, movie.ratings)
         )  # Convert list of ratings to a string
@@ -34,6 +46,11 @@ class MovieDao:
         self.conn.commit()
 
     def get_movie(self, movie_id):
+        """
+        Get a movie by ID.
+        :param movie_id:
+        :return:
+        """
         self.cursor.execute(
             "SELECT * FROM movies WHERE movie_id = ?",
             (movie_id,),
@@ -47,6 +64,10 @@ class MovieDao:
         return None
 
     def get_all_movies(self):
+        """
+        Get all movies.
+        :return:
+        """
         self.cursor.execute("SELECT * FROM movies")
         rows = self.cursor.fetchall()
         movies = []
@@ -58,6 +79,11 @@ class MovieDao:
         return movies
 
     def update_movie(self, movie):
+        """
+        Update a movie in the database.
+        :param movie:
+        :return:
+        """
         ratings_str = ",".join(
             map(str, movie.ratings)
         )  # Convert list of ratings to a string
@@ -71,6 +97,11 @@ class MovieDao:
         return False
 
     def delete_movie(self, movie_id):
+        """
+        Delete a movie from the database.
+        :param movie_id:
+        :return:
+        """
         self.cursor.execute(
             "DELETE FROM movies WHERE movie_id = ?",
             (movie_id,),
@@ -81,4 +112,8 @@ class MovieDao:
         return False
 
     def close(self):
+        """
+        Close the database connection.
+        :return:
+        """
         self.conn.close()

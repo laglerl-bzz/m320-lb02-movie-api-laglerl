@@ -4,7 +4,9 @@ Movie Rating API
 
 from flask import Flask
 
-from movieBlueprint import movie_blueprint
+from movie_blueprint import movie_blueprint
+from movie import Movie
+from movie_dao import MovieDao
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -13,8 +15,10 @@ app.register_blueprint(movie_blueprint)
 
 
 def generate_testdata():
-    from movie import Movie
-    from movieDao import MovieDao
+    """
+    Generates test data for the movie database.
+    :return:
+    """
 
     movie_dao = MovieDao("movie_rating_example.db")
 

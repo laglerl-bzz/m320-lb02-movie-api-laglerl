@@ -1,3 +1,8 @@
+"""
+Dieses Modul enthält Hilfsfunktionen, die in der main.py-Datei verwendet werden.
+"""
+
+
 def calculate_average_rating_algo(ratings):
     """
     Berechnet den Durchschnitt der Bewertungen mit einem Algorithmus.

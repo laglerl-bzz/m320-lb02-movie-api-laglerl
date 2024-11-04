@@ -2,9 +2,10 @@
 Movie Rating API Blueprint
 """
 
-from flask import Blueprint, jsonify, request
 from functools import reduce
-from movieDao import MovieDao
+
+from flask import Blueprint, jsonify, request
+from movie_dao import MovieDao
 from movie import Movie
 from utils import (
     calculate_average_rating,
@@ -19,6 +20,10 @@ movie_dao = MovieDao("movie_rating_example.db")
 
 @movie_blueprint.route("/", methods=["GET"])
 def list_routes():
+    """
+    List all available routes.
+    :return:
+    """
     routes = {
         "GET": [
             "/movies - Get all movies",
@@ -40,12 +45,20 @@ def list_routes():
 
 @movie_blueprint.route("/movies", methods=["GET"])
 def get_all_movies():
+    """
+    Get all movies.
+    :return:
+    """
     movies = movie_dao.get_all_movies()
     return jsonify([movie.__dict__ for movie in movies]), 200
 
 
 @movie_blueprint.route("/movies/average_ratings_v1", methods=["GET"])
 def average_ratings_v1():
+    """
+    Get average ratings (v1).
+    :return:
+    """
     movies = movie_dao.get_all_movies()
     average_rating_func = calculate_average_rating
     average_ratings = apply_function_to_movies(movies, average_rating_func)
@@ -55,6 +68,10 @@ def average_ratings_v1():
 
 @movie_blueprint.route("/movies/average_ratings_v2", methods=["GET"])
 def average_ratings_v2():
+    """
+    Get average ratings (v2).
+    :return:
+    """
     movies = movie_dao.get_all_movies()
     average_ratings = list(
         map(calculate_average_rating, [movie.ratings for movie in movies])
@@ -65,6 +82,10 @@ def average_ratings_v2():
 
 @movie_blueprint.route("/movies/filter_v1", methods=["GET"])
 def filter_movies_v1():
+    """
+    Filter movies (v1).
+    :return:
+    """
     min_rating = int(request.args.get("min_rating", 0))
     title = int(request.args.get("title", ""))
 
@@ -78,6 +99,10 @@ def filter_movies_v1():
 
 @movie_blueprint.route("/movies/filter_v2", methods=["GET"])
 def filter_movies_v2():
+    """
+    Filter movies (v2).
+    :return:
+    """
     min_rating = request.args.get("min_rating", type=float, default=3.0)
     movies = movie_dao.get_all_movies()
     filtered_movies = list(
@@ -97,7 +122,11 @@ def filter_movies_v2():
 
 
 @movie_blueprint.route("/movies/overall_average", methods=["GET"])
-def filter_movies_v3():
+def overall_average():
+    """
+    Get overall average rating.
+    :return:
+    """
     min_rating = request.args.get("min_rating", type=float, default=3.0)
     movies = movie_dao.get_all_movies()
 
@@ -107,16 +136,21 @@ def filter_movies_v3():
     average_ratings = list(
         map(calculate_average_rating, [movie.ratings for movie in filtered_movies])
     )
-    overall_average = (
+    overall_average_movies = (
         reduce(lambda acc, x: acc + x, average_ratings) / len(average_ratings)
         if average_ratings
         else 0
     )
 
-    return jsonify(overall_average), 200
+    return jsonify(overall_average_movies), 200
 
 
 def sort_movies_by_average_rating(movies):
+    """
+    Sort movies by average rating.
+    :param movies:
+    :return:
+    """
     return sorted(
         movies, key=lambda movie: calculate_average_rating(movie.ratings), reverse=True
     )
@@ -124,6 +158,10 @@ def sort_movies_by_average_rating(movies):
 
 @movie_blueprint.route("/movies/sorted", methods=["GET"])
 def get_sorted_movies():
+    """
+    Get sorted movies by average rating.
+    :return:
+    """
     movies = movie_dao.get_all_movies()
     sorted_movies = sort_movies_by_average_rating(movies)
     return jsonify([movie.__dict__ for movie in sorted_movies]), 200
@@ -131,20 +169,34 @@ def get_sorted_movies():
 
 @movie_blueprint.route("/movies/<int:movie_id>", methods=["GET"])
 def get_movie(movie_id):
+    """
+    Get a movie by ID.
+    :param movie_id:
+    :return:
+    """
     movie = movie_dao.get_movie(movie_id)
     if movie:
         average_rating = calculate_average_rating(movie.ratings)
         return jsonify({"movie": movie.__dict__, "average_rating": average_rating}), 200
-    else:
-        return jsonify({"message": "Movie not found"}), 404
+
+    return jsonify({"message": "Movie not found"}), 404
 
 
 def create_movie(data):
+    """
+    Create a movie object from the given data.
+    :param data:
+    :return:
+    """
     return Movie(None, data["title"], data["ratings"])
 
 
 @movie_blueprint.route("/movies", methods=["POST"])
 def add_movie():
+    """
+    Add a new movie.
+    :return:
+    """
     data = request.get_json()
     new_movie = create_movie(data)
     movie_dao.add_movie(new_movie)
@@ -153,33 +205,48 @@ def add_movie():
 
 @movie_blueprint.route("/movies/<int:movie_id>", methods=["PUT"])
 def update_movie(movie_id):
+    """
+    Update a movie.
+    :param movie_id:
+    :return:
+    """
     data = request.get_json()
     updated_movie = Movie(movie_id, data["title"], data["ratings"])
     if movie_dao.update_movie(updated_movie):
         return jsonify({"message": "Movie updated"}), 200
-    else:
-        return jsonify({"message": "Movie not found or not updated"}), 404
+
+    return jsonify({"message": "Movie not found or not updated"}), 404
 
 
 def create_delete_response(deleted):
     """Helper function to create the appropriate response for movie deletion."""
     if deleted:
         return jsonify({"message": "Movie deleted"}), 200
-    else:
-        return jsonify({"message": "Movie not found or not deleted"}), 404
+
+    return jsonify({"message": "Movie not found or not deleted"}), 404
 
 
 @movie_blueprint.route("/movies/<int:movie_id>", methods=["DELETE"])
 def delete_movie(movie_id):
+    """
+    Delete a movie.
+    :param movie_id:
+    :return:
+    """
     deleted = movie_dao.delete_movie(movie_id)
     return create_delete_response(deleted)
 
 
 @movie_blueprint.route("/movies/<int:movie_id>/highest_rating", methods=["GET"])
 def highest_rating_endpoint(movie_id):
+    """
+    Get highest rating for a movie.
+    :param movie_id:
+    :return:
+    """
     movie = movie_dao.get_movie(movie_id)
     if movie:
         highest_rating = get_highest_rating_for_movie(movie)
         return jsonify({"title": movie.title, "highest_rating": highest_rating}), 200
-    else:
-        return jsonify({"message": "Movie not found"}), 404
+
+    return jsonify({"message": "Movie not found"}), 404
