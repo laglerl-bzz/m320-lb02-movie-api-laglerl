@@ -59,6 +59,17 @@ def filter_valid_ratings(ratings):
     return [rating for rating in ratings if rating is not None]
 
 
+def calculate_average(ratings):
+    """
+    Berechnet den Durchschnitt der gültigen Bewertungen.
+
+    :param ratings: Liste von Integer-Bewertungen
+    :return: Durchschnitt der gültigen Bewertungen oder None
+    """
+    valid_ratings = filter_valid_ratings(ratings)
+    return calculate_average_rating(valid_ratings)
+
+
 def get_highest_rating_for_movie(movie):
     """
     Berechnet die höchste Bewertung für einen Film.
