@@ -12,6 +12,33 @@ movie_blueprint = Blueprint("movie_blueprint", __name__)
 movie_dao = MovieDao("movie_rating_example.db")
 
 
+@movie_blueprint.route("/", methods=["GET"])
+def list_routes():
+    routes = {
+        "GET": [
+            "/movies - Get all movies",
+            "/movies/average_ratings_v1 - Get average ratings (v1)",
+            "/movies/average_ratings_v2 - Get average ratings (v2)",
+            "/movies/filter_v1?min_rating=<value>&title=<value> - Filter movies (v1)",
+            "/movies/filter_v2?min_rating=<value> - Filter movies (v2)",
+            "/movies/overall_average?min_rating=<value> - Get overall average rating",
+            "/movies/sorted - Get sorted movies by average rating",
+            "/movies/<int:movie_id> - Get a movie by ID",
+            "/movies/<int:movie_id>/highest_rating - Get highest rating for a movie",
+        ],
+        "POST": [
+            "/movies - Add a new movie"
+        ],
+        "PUT": [
+            "/movies/<int:movie_id> - Update a movie"
+        ],
+        "DELETE": [
+            "/movies/<int:movie_id> - Delete a movie"
+        ]
+    }
+    return jsonify(routes), 200
+
+
 @movie_blueprint.route("/movies", methods=["GET"])
 def get_all_movies():
     movies = movie_dao.get_all_movies()
