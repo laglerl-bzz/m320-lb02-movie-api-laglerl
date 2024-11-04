@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request
 from functools import reduce
 from movieDao import MovieDao
 from movie import Movie
-from utils import calculate_average_rating, apply_function_to_movies, create_rating_filter
+from utils import calculate_average_rating, apply_function_to_movies, create_rating_filter, get_highest_rating_for_movie
 
 movie_blueprint = Blueprint("movie_blueprint", __name__)
 movie_dao = MovieDao("movie_rating_example.db")
@@ -70,14 +70,14 @@ def filter_movies_v3():
     return jsonify(overall_average), 200
 
 
+def sort_movies_by_average_rating(movies):
+    return sorted(movies, key=lambda movie: calculate_average_rating(movie.ratings), reverse=True)
+
+
 @movie_blueprint.route("/movies/sorted", methods=["GET"])
 def get_sorted_movies():
-    """
-    Endpoint to retrieve all movies sorted by their average rating.
-    """
     movies = movie_dao.get_all_movies()
-    sorted_movies = sorted(movies, key=lambda movie: calculate_average_rating(movie.ratings), reverse=True)
-
+    sorted_movies = sort_movies_by_average_rating(movies)
     return jsonify([movie.__dict__ for movie in sorted_movies]), 200
 
 
@@ -116,9 +116,26 @@ def update_movie(movie_id):
         return jsonify({"message": "Movie not found or not updated"}), 404
 
 
-@movie_blueprint.route("/movies/<int:movie_id>", methods=["DELETE"])
-def delete_movie(movie_id):
-    if movie_dao.delete_movie(movie_id):
+def create_delete_response(deleted):
+    """Helper function to create the appropriate response for movie deletion."""
+    if deleted:
         return jsonify({"message": "Movie deleted"}), 200
     else:
         return jsonify({"message": "Movie not found or not deleted"}), 404
+
+
+@movie_blueprint.route("/movies/<int:movie_id>", methods=["DELETE"])
+def delete_movie(movie_id):
+    deleted = movie_dao.delete_movie(movie_id)
+    return create_delete_response(deleted)
+
+
+@movie_blueprint.route("/movies/<int:movie_id>/highest_rating", methods=["GET"])
+def highest_rating_endpoint(movie_id):
+    movie = movie_dao.get_movie(movie_id)
+    if movie:
+        highest_rating = get_highest_rating_for_movie(movie)
+        return jsonify({"title": movie.title, "highest_rating": highest_rating}), 200
+    else:
+        return jsonify({"message": "Movie not found"}), 404
+

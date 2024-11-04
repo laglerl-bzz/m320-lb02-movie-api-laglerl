@@ -1,3 +1,17 @@
+def calculate_average_rating_algo(ratings):
+    """
+    Berechnet den Durchschnitt der Bewertungen mit einem Algorithmus.
+
+    :param ratings: Liste von Integer-Bewertungen
+    :return: Durchschnitt der Bewertungen oder None, wenn die Liste leer ist
+    """
+    if not ratings:
+        return None
+    total = sum(ratings)
+    average = total / len(ratings)
+    return round(average, 2)
+
+
 def calculate_average_rating(ratings):
     """
     Berechnet den Durchschnitt der Bewertungen.
@@ -33,3 +47,26 @@ def create_rating_filter(min_rating, title):
     """
 
     return lambda movie: calculate_average_rating(movie.ratings) > min_rating and title.lower() in movie.title.lower()
+
+
+def filter_valid_ratings(ratings):
+    """
+    Filtert ungültige Bewertungen aus.
+
+    :param ratings: Liste von Integer-Bewertungen
+    :return: Liste von gültigen Bewertungen
+    """
+    return [rating for rating in ratings if rating is not None]
+
+
+def get_highest_rating_for_movie(movie):
+    """
+    Berechnet die höchste Bewertung für einen Film.
+
+    :param movie: Filmobjekt
+    :return: Höchste Bewertung oder None
+    """
+
+    find_highest_rating = lambda ratings: max(ratings) if ratings else None
+    valid_ratings = filter_valid_ratings(movie.ratings)
+    return find_highest_rating(valid_ratings)
